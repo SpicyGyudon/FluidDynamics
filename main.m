@@ -38,65 +38,81 @@
 %---------------------------------------------------------------------------
 clear; clc;
 
-N = 30; % grid number -> grid: 1 , N 칸은 바운더리 -> 루프는 2 ~ N-1 까지 돎
+N = 150; 
+length = 1;
+h = length/N;
+% grid number -> grid: 1 , N 칸은 바운더리 -> 루프는 2 ~ N-1 까지 돎
 % boundary -> 모서리 : horizon 에선 v = 0 , vertical 에선 u =0 , x = 그 앞벽의 값
 %          -> 꼭지점 : 주변 2값 의 평균
 
 % diff = 확산률
-b = 0;
-x0 = 0*ones(N,N);
-x0(10:20,10:20) = 1;
+% x0 = 0*ones(N,N,'gpuArray');
+x0 = 0*ones(N);
+% x0(60:90,60:80) = 0.7;
+x0(135:145,80:100) = 1;
+
 x=x0;
-diff = 0.5;
-visc = 0.5;
+diff = 8;
+visc = 5;
+dt = 0.01;
 
-
-u0 = zeros(N);
-u0(10:20,:) = 5;
+u0 = -1*10/N*ones(N);
+% u0 = zeros(N,'gpuArray');
+% u0(20:30,:) = 5;
 v0 = zeros(N);
-v0(:,10:20) = 5;
+% v0 = zeros(N,'gpuArray');
+% v0(80:90,:) = -5/N;
 
 u0 = bnd(N,1,u0);
 v0 = bnd(N,2,v0);
 u=u0;
 v=v0;
-
-interval = 500;
+xgrid = linspace(0,1,N);
+ygrid = linspace(1,0,N);
+interval = 1;
 step=interval;
 idx=1;
-for i = 1: 4000
+
+for i = 1: 300
 % velocity
+v=gravity(N,2,v,x,dt);
+[u,v]=div_clear(N,u,v,h);
 [u,u0] = swap(u,u0); [v,v0] = swap(v,v0);
-u = diffuse(N,1,u,u0,visc,0.01); v = diffuse(N,2,v,v0,visc,0.01);
-[u,v]=div_clear(N,u,v);
+u = diffuse(N,1,u,u0,visc,dt); v = diffuse(N,2,v,v0,visc,dt);
+[u,v]=div_clear(N,u,v,h);
 [u,u0] = swap(u,u0); [v,v0] = swap(v,v0);
-u = advect(N,1,u,u0,u0,v0,0.01); v = advect(N,2,v,v0,u0,v0,0.01);
-[u,v]=div_clear(N,u,v);
+u = advect(N,1,u,u0,u0,v0,dt,h); v = advect(N,2,v,v0,u0,v0,dt,h);
+[u,v]=div_clear(N,u,v,h);
 % density
-[x,x0] = swap(x,x0); x = diffuse(N,0,x,x0,diff,0.01);
-[x,x0] = swap(x,x0); x = advect(N,0,x,x0,u,v,0.01);
+[x,x0] = swap(x,x0); x = diffuse(N,0,x,x0,diff,dt);
+[x,x0] = swap(x,x0); x = advect(N,0,x,x0,u,v,dt,h);
+
 if step == interval
-    X(:,:,idx) = x;
-    U(:,:,idx) = u;
-    V(:,:,idx) = v;
+    figure(1)
+%     X(:,:,idx) = x;
+%     U(:,:,idx) = u;
+%     V(:,:,idx) = v;
+%     idx = idx+1;
+    imagesc(xgrid,ygrid,x)
+    title(num2str(i*dt))
     step=0;
-    idx = idx+1;
 end
 step=step+1;
 end
 
-for  step = 1 : length(X(1,1,:))
-figure(1)
-plot(0,0)
-hold on;
-for  i = 1: N
-    for j = 1: N
-        plot(i,j,'o','color',[exp(1-X(j,i,step))/exp(1) exp(1-X(j,i,step))/exp(1) exp(1-X(j,i,step))/exp(1)])
-        plot([i i+u(j,i)],[j j+v(j,i)],'r-')
-    end
-end
-
-hold off;
-text(N/2,N/2,num2str(step))
-axis([0 N+1 0 N+1])
-end
+% 
+% for  step = 1 : length(X(1,1,:))
+% figure(1)
+% plot(0,0)
+% hold on;
+% for  i = 1: N
+%     for j = 1: N
+%         plot(i,j,'o','color',[exp(1-X(j,i,step))/exp(1) exp(1-X(j,i,step))/exp(1) exp(1-X(j,i,step))/exp(1)])
+%         plot([i i+u(j,i)],[j j+v(j,i)],'r-')
+%     end
+% end
+% 
+% hold off;
+% text(N/2,N/2,num2str(step))
+% axis([0 N+1 0 N+1])
+% end

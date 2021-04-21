@@ -1,9 +1,9 @@
-function x = advect(N,b,x,x0,u,v,dt)
+function x = advect(N,b,x,x0,u,v,dt,h)
 
 for i = 2: N-1
     for j = 2 : N-1
-        x_grid = i - dt*u(j,i);
-        y_grid = j - dt*v(j,i);
+        x_grid = i - dt*u(j,i)/h;
+        y_grid = j - dt*v(j,i)/h;
         if x_grid < 1.5
             x_grid = 1.5;
         elseif x_grid > N-0.5
