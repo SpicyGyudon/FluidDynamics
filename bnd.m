@@ -1,11 +1,36 @@
 function x = bnd(N,b,x)
 for i = 2 : N-1 
     if b == 1 % u
-        x(i,1) = 0 ;
-        x(i,N) = 0 ;
+        if x(i,2) < 0
+            x(i,1) = 0;
+        else
+            x(i,1) = x(i,2);
+        end
+        
+        if x(i,N-1) > 0
+            x(i,N) = 0;
+        else
+            x(i,N) = x(i,N-1);
+        end
+        
+        x(1,i) = x(2,i);
+        x(N,i) = x(N-1,i);
     elseif b== 2 % v
-        x(1,i) = 0 ;
-        x(N,i) = 0 ;
+   
+        if x(2,i) < 0
+            x(1,i) = 0;
+        else
+            x(1,i) = x(2,i);
+        end
+        
+        if x(N-1,i) > 0
+            x(N,i) = 0;
+        else
+            x(N,i) = x(N-1,i);
+        end
+        
+        x(i,1) = x(i,2);
+        x(i,N) = x(i,N-1);
     else % ¹Ðµµ
         x(1,i) = x(2,i);
         x(N,i) = x(N-1,i);

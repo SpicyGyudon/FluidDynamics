@@ -4,15 +4,15 @@ for i = 2: N-1
     for j = 2 : N-1
         x_grid = i - dt*u(j,i)/h;
         y_grid = j - dt*v(j,i)/h;
-        if x_grid < 1.5
-            x_grid = 1.5;
-        elseif x_grid > N-0.5
-            x_grid = N-0.5;
+        if x_grid < 1
+            x_grid = 1;
+        elseif x_grid > N
+            x_grid = N-0.001;
         end
-        if y_grid < 1.5
-            y_grid = 1.5;
-        elseif y_grid > N-0.5
-            y_grid = N-0.5;
+        if y_grid < 1
+            y_grid = 1;
+        elseif y_grid > N
+            y_grid = N-0.001;
         end
         i0 = floor(x_grid); i1 = i0+1;
         j0 = floor(y_grid); j1 = j0+1;
